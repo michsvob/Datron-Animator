@@ -2,13 +2,66 @@ import re #regular expressions
 import matplotlib.pyplot as plt
 import time
 import math
+import pandas as pd
 
 #Datron animator
 progs={"MKSV4K":"N:/Datron 5/Sicherung_2018-05-24/Disp/MKSV4_K.MCR",
-       "EB7_V":"C:/Users/m.svoboda/Desktop/EB7_V.MCR",
-       "EB7_V_obdelnik":"C:/Users/m.svoboda/Desktop/EB7_V_rechteck.MCR",
-       #"CBU":"C:/Users/m.svoboda/Desktop/bsp.mcr",
+       "EB7_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/EB7_V_neu.MCR",
+       "EB7_neu2":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/EB7_V_neu2.MCR",
+       "EB7_neu4":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/EB7_V_neu4.MCR",
+       "EB7_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/EB7_V_alt.MCR",
+       "LF20_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LF20_36_V_alt.MCR",
+       "LF20_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LF20_36_V_neu.MCR",
+       "V20_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400V20_36_V_alt.MCR",
+       "V20_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400V20_36_V_neu.MCR",
+       "MDS_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MDS-M_V_alt.MCR",
+       "MDS_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MDS-M_V_neu.MCR",
+       "VSE_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400VSE_V_alt.MCR",
+       "VSE_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400VSE_V_neu.MCR",
+       "VSE_neu_2":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400VSE_V_neu_2.MCR",
+       "LC2_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LC2_V_alt.MCR",
+       "LC2_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LC2_V_neu.MCR",
+       "El3_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/El3_V_alt.MCR",
+       "El3_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/El3_V_neu.MCR",
+       "mksv_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MKSV4_V_alt.MCR",
+       "mksv_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MKSV4_V_neu.MCR",
+       "CBU_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/CBU-M_V_alt.MCR",
+       "CBU_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/CBU-M_V_neu.MCR",
+       "DPS6":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/DPS6_K.MCR",
+       "MSE_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MSE_V.MCR",
+       "MSE_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MSE_V_neu.MCR",
+       "test":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/test.txt"
        }
+
+import numpy as np
+
+def cart2pol(x, y):
+    rho = np.sqrt(x**2 + y**2)
+    phi = np.arctan2(y, x)
+    return(rho, phi)
+
+def pol2cart(rho, phi):
+    x = rho * np.cos(phi)
+    y = rho * np.sin(phi)
+    return(x, y)
+
+def heav(number):
+    if number>=0:
+        return 1
+    else:
+        return 0
+
+def zero(number):
+    if number==0:
+        return 0
+    else:
+        return 1
+
+def floor (number):
+    return math.floor(number)
+
+def ceil (number):
+    return math.ceil(number)
 
 def is_number(s):
     try:
@@ -25,7 +78,7 @@ class Datprog:
         self.get_submakros()
         self.stack=[0]
         self.position={"x":[0],"y":[0],"z":[0],"makro":["main"]}
-        self.variables={"Zp":0,"Xp":0,"Yp":0,"Araupe":0,"Time":0}#was ist Xp, Yp, Zp?
+        self.variables={"Zp":0,"Xp":0,"Yp":0,"Araupe":0,"Time":0}#was ist *p - aktuelle Koordinate (Axyz kann so manche Koordinaten als relativ akzeptieren)
         self.nullpunktnr=0
         self.nullpunkt={"x":[0,0,0,0,0,0,0,0],"y":[0,0,0,0,0,0,0,0],"z":[0,0,0,0,0,0,0,0]}
         self.akt_makro=["main"]
@@ -91,7 +144,11 @@ class Datprog:
                 rhs=eval(rhs)
 
             except SyntaxError as e:
-                print("Zeile übersprungen "+str(e))
+                print("Syntax Error: Zeile übersprungen "+str(e))
+            except NameError as e:
+                print("Name Error: Zeile übersprungen "+str(e))
+
+                
             self.variables[lhs]=rhs
             #print(self.variables)
 
@@ -110,6 +167,7 @@ class Datprog:
             self.position["makro"].append(self.akt_makro[-1])
             #print(str(len(self.position["x"]))+" abs x:"+str(self.position["x"][-1])+" y:"+str(self.position["y"][-1]))
             self.update_XYZp()
+            #print(self.variables)
             
                 
         elif not(re.findall(r'Ixyz',line))==[]:
@@ -128,6 +186,22 @@ class Datprog:
             #print(str(len(self.position["x"]))+" rel x:"+str(self.position["x"][-1])+" y:"+str(self.position["y"][-1]))
             self.update_XYZp()
 
+        elif not(re.findall(r'Dispon',line))==[]:
+            #print(line)
+            elems=line.lstrip().lstrip("Dispon").lstrip("_links").replace(" ","").split(",")
+            
+            for i,elem in enumerate(elems):
+                for key in sorted(self.variables,reverse=True):
+                    elem=elem.replace(key,str(self.variables[key]))
+                elems[i]=eval(elem)
+                
+            self.position["x"].append(self.position["x"][-1])
+            self.position["y"].append(self.position["y"][-1])
+            self.position["z"].append(elems[10]+self.nullpunkt["z"][self.nullpunktnr])
+            self.position["makro"].append(self.akt_makro[-1])
+            #print(str(len(self.position["x"]))+" rel x:"+str(self.position["x"][-1])+" y:"+str(self.position["y"][-1]))
+            self.update_XYZp()
+
         elif not(re.findall(r'Dispoff',line))==[]:
             #print(line)
             elems=line.lstrip().lstrip("Dispoff").replace(" ","").split(",")
@@ -141,74 +215,67 @@ class Datprog:
                 self.position["x"].append(self.position["x"][-1]+elems[5])
                 self.position["y"].append(self.position["y"][-1])
                 self.position["z"].append(self.position["z"][-1])
-
+                self.position["makro"].append(self.akt_makro[-1])
+            elif elems[1]==270 or elems[5]==0:
+                self.position["x"].append(self.position["x"][-1])
+                self.position["y"].append(self.position["y"][-1]+elems[5])
+                self.position["z"].append(self.position["z"][-1])
+                self.position["makro"].append(self.akt_makro[-1])
             else:
                 raise ValueError("Nicht implementiert für diese Angaben von Dispoff" + line)
+                exit
 
+            self.position["x"].append(self.position["x"][-1])
+            self.position["y"].append(self.position["y"][-1])
+            self.position["z"].append(elems[8]+self.nullpunkt["z"][self.nullpunktnr])
             self.position["makro"].append(self.akt_makro[-1])
             #print(str(len(self.position["x"]))+" dispoff x:"+str(self.position["x"][-1])+" y:"+str(self.position["y"][-1]))
             self.update_XYZp()
             
         elif not(re.findall(r'Kreis',line))==[]:
-            #print(line)
             elems=line.lstrip().lstrip("Kreis").replace(" ","").split(",")
             
             for i,elem in enumerate(elems):
                 for key in sorted(self.variables,reverse=True):
                     elem=elem.replace(key,str(self.variables[key]))
-                elems[i]=eval(elem)
+                try:
+                    elems[i]=eval(elem)
+                except NameError as e:
+                    print("Name Error: Zeile übersprungen "+str(e))
+                    return(nextline)
 
-            aw=float(elems[4])
-            ew=float(elems[5])
-            d=float(elems[0])
-            ws=float(elems[3])
+            aw=int(elems[4]) #Anfangswinkel
+            ew=int(elems[5]) #Endwinkel
+            d=float(elems[0]) #Durchmesser
+            r=d/2 #Radius
+            ws=int(elems[3]) #Richtung: 0: anti-clockwise, -360: clockwise
 
-            if aw==270 and ws==-360 and ew==90:                
-                self.position["x"].append(self.position["x"][-1]-d/2)                
-                self.position["y"].append(self.position["y"][-1]+d/2) 
-                self.position["z"].append(self.position["z"][-1])
-                self.position["makro"].append(self.akt_makro[-1])
+            posx0=self.position["x"][-1]
+            posy0=self.position["y"][-1]
 
-                self.position["x"].append(self.position["x"][-1]+d/2)
-                self.position["y"].append(self.position["y"][-1]+d/2)
-                self.position["z"].append(self.position["z"][-1])
-                self.position["makro"].append(self.akt_makro[-1])
+            anglestep=5
+            
+            if ws==-360:
+                if aw<ew:
+                    aw=aw+360
+                    
+                for angle in range(aw,ew-anglestep,-anglestep):
+                    self.position["x"].append(posx0-r*math.cos(math.radians(aw))+pol2cart(r,math.radians(angle))[0])                
+                    self.position["y"].append(posy0-r*math.sin(math.radians(aw))+pol2cart(r,math.radians(angle))[1]) 
+                    self.position["z"].append(self.position["z"][-1])
+                    self.position["makro"].append("kreis")
 
-            elif aw==270 and ws==0 and ew==90:                
-                self.position["x"].append(self.position["x"][-1]+d/2)
-                self.position["y"].append(self.position["y"][-1]+d/2)
-                self.position["z"].append(self.position["z"][-1])
-                self.position["makro"].append(self.akt_makro[-1])
-
-                self.position["x"].append(self.position["x"][-1]-d/2)
-                self.position["y"].append(self.position["y"][-1]+d/2)
-                self.position["z"].append(self.position["z"][-1])
-                self.position["makro"].append(self.akt_makro[-1])
-
-            elif aw==180 and ws==0 and ew==0:                
-                self.position["x"].append(self.position["x"][-1]-d/2)
-                self.position["y"].append(self.position["y"][-1]+d/2)
-                self.position["z"].append(self.position["z"][-1])
-                self.position["makro"].append(self.akt_makro[-1])
-
-                self.position["x"].append(self.position["x"][-1]-d/2)
-                self.position["y"].append(self.position["y"][-1]-d/2)
-                self.position["z"].append(self.position["z"][-1])
-                self.position["makro"].append(self.akt_makro[-1])
-
-            elif aw==0 and ws==0 and ew==180:                
-                self.position["x"].append(self.position["x"][-1]+d/2)
-                self.position["y"].append(self.position["y"][-1]-d/2)
-                self.position["z"].append(self.position["z"][-1])
-                self.position["makro"].append(self.akt_makro[-1])
-
-                self.position["x"].append(self.position["x"][-1]+d/2)
-                self.position["y"].append(self.position["y"][-1]-d/2)
-                self.position["z"].append(self.position["z"][-1])
-                self.position["makro"].append(self.akt_makro[-1])
-
+            elif ws==0:
+                if ew<aw:
+                  ew=ew+360
+                for angle in range(aw,ew+anglestep,anglestep):
+                    self.position["x"].append(posx0-r*math.cos(math.radians(aw))+pol2cart(r,math.radians(angle))[0])                
+                    self.position["y"].append(posy0-r*math.sin(math.radians(aw))+pol2cart(r,math.radians(angle))[1]) 
+                    self.position["z"].append(self.position["z"][-1])
+                    self.position["makro"].append("kreis")                    
             else:
-                raise(ValueError("andere angaben als aw=270, ws=0/-360, ew=90 nicht unterstützt"))            
+                print(line)
+                raise(ValueError("andere angaben als ws=0/-360 nicht unterstützt"))            
             #print(str(len(self.position["x"]))+" kreis x:"+str(self.position["x"][-1])+" y:"+str(self.position["y"][-1]))
             self.update_XYZp()
 
@@ -220,7 +287,21 @@ class Datprog:
             self.nullpunkt["z"][self.nullpunktnr]=self.position["z"][-1]-float(elems[2])
 
         elif not(re.findall(r'Relsp',line))==[]:
-            self.nullpunktnr=int(line[-1])            
+            self.nullpunktnr=int(line[-1])
+
+        elif not(re.findall(r'Mal',line))==[]:
+            #print(line)
+            #print(self.variables)
+            times=self.variables[line.lstrip().lstrip("Mal").replace(" ","")]
+            #print(times)
+            makroline=self.prog[line_number+1]
+            for i in range(times-1):
+                #print(makroline)
+                self.prog.insert(line_number+1,makroline)
+
+            if times<=0:
+                return(nextline+1)
+
 
         elif not(re.findall(r'^Submakro',line.lstrip()))==[]:
             #run submacro
@@ -274,81 +355,89 @@ def anim(datronObjekt):
     def update(frame):
         #print(frame)
         #print(datronObjekt.position["x"][frame])
-        #xdata.append(datronObjekt.position["z"][frame])
-        #ydata.append(datronObjekt.position["y"][frame])
-        xdata=datronObjekt.position["x"][frame]
-        ydata=datronObjekt.position["y"][frame]
+        xdata.append(datronObjekt.position["x"][frame])
+        ydata.append(datronObjekt.position["y"][frame])
+        #xdata=datronObjekt.position["x"][frame]
+        #ydata=datronObjekt.position["y"][frame]
         ln.set_data(xdata, ydata)
         return ln,
 
     ani = FuncAnimation(fig, update, frames=np.arange(1,len(datronObjekt.position["x"])),
-                        init_func=init, blit=True,interval=100)
+                        init_func=init, blit=True,interval=500)
     plt.show()    
 
 
-def anim2(datronObjekt):
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from matplotlib.animation import FuncAnimation
-
-    fig = plt.figure()
-    ax=fig.add_subplot(1,1,1)
-    ax.set_xlim(min(datronObjekt.position["x"])-10, max(datronObjekt.position["x"])+10)
-    ax.set_ylim(min(datronObjekt.position["y"])-10, max(datronObjekt.position["y"])+10)
-
-    xdata, ydata = [], []
-    global line
-
-    line=None
-    
-
-    def update(frame):
-        global line
-        
-        xdata=datronObjekt.position["x"][frame]
-        ydata=datronObjekt.position["y"][frame]
-
-        if line is not None:
-            line.set_color("gray")
-        
-        line,=ax.plot(xdata, ydata,color="red")
-
-    ani = FuncAnimation(fig, update, frames=np.arange(1,len(datronObjekt.position["x"])),blit=True,interval=100)
-    plt.show()
-
-
+pd.set_option('expand_frame_repr', False)
+pd.set_option('display.max_rows', 500)
   
-def run_prog(prog):
+def run_prog(prog,yaxis="y",xaxis="x"):
     dat=Datprog(prog)
     dat.go_through()
-    plt.subplot(111)
-    plt.plot(dat.position["x"],dat.position["y"],"b-")
-    for i,xy in enumerate(zip(dat.position["x"],dat.position["y"])):
-        plt.annotate(str(i+1),xy=xy,fontsize=8)    
 
-    plt.ylabel("Y")
-    plt.xlabel("X")
+    df=pd.DataFrame(dat.position)
+    df = df[df['makro'] != "kreis"].reset_index()
+    print(df)
+    
+    #plt.subplot(211)
+    plt.plot(dat.position[xaxis],dat.position[yaxis],"b-")
+
+    k=0
+    for i,ii in enumerate(dat.position["makro"]):
+        if dat.position["makro"][i]!="kreis":
+            plt.annotate(k,xy=(dat.position[xaxis][i],dat.position[yaxis][i]),fontsize=8)
+            k=k+1 
+
+    plt.ylabel(yaxis)
+    plt.xlabel(xaxis)
+    plt.title(prog)
+    plt.grid(b=True, which='major', color='r', linestyle='--')
+    plt.grid(b=True, which='minor', color='g', linestyle='--')
+    plt.minorticks_on()
+    #plt.xlim(-60,270)
+    #plt.ylim(-50,350)
+    
     plt.show()
     
-    anim(dat)
+    #anim(dat)
     x_0=0
     y_0=0
     length=0
     
-    for x,y in zip(dat.position["x"],dat.position["y"]):
+    for x,y in zip(dat.position[xaxis],dat.position[yaxis]):
         length+=math.sqrt((x-x_0)*(x-x_0)+(y-y_0)*(y-y_0))
         x_0=x
         y_0=y
 
     print("länge: "+str(length))
-
+    return(dat)
     
-run_prog("EB7_V_obdelnik")
-#run_prog("EB7_V")
-#run_prog("MKSV4K")
+#run_prog("mksv_alt")
+#dat=run_prog("mksv_neu")     
+#run_prog("El3_alt")
+#run_prog("El3_neu") 
+#run_prog("CBU_alt")
+#run_prog("CBU_neu")  
+#g=run_prog("DPS6")
+#g=run_prog("MSE_alt")
+#g=run_prog("EB7_neu4")
+#g=run_prog("EB7_neu")
+#run_prog("V20_neu")
+#run_prog("V20_alt")
+#run_prog("LF20_neu")
+#run_prog("LF20_alt")
+#run_prog("V20_neu")
+#run_prog("MDS_neu")
+#run_prog("MDS_alt")
+#run_prog("EB7_alt")
+#run_prog("EB7_neu2")
+#run_prog("LC2_neu")
+#run_prog("LC2_alt")
+#run_prog("VSE_neu")
+#run_prog("VSE_neu")
+#run_prog("VSE_alt")
+#dat=run_prog("VSE_neu_2")
 
-
-
-    
-
-
+a=run_prog("MSE_neu","y")
+b=run_prog("MSE_alt","y")
+c=run_prog("MSE_neu","z")
+d=run_prog("MSE_alt","z")
