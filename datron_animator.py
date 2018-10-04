@@ -147,13 +147,10 @@ class Datprog:
                 print("Syntax Error: Zeile übersprungen "+str(e))
             except NameError as e:
                 print("Name Error: Zeile übersprungen "+str(e))
-
-                
+            
             self.variables[lhs]=rhs
-            #print(self.variables)
 
         elif not(re.findall(r'Axyz',line))==[]:
-            #print(line)
             elems=line.lstrip().lstrip("Axyz").replace(" ","").split(",")                
 
             for i,elem in enumerate(elems):
@@ -165,13 +162,10 @@ class Datprog:
             self.position["y"].append(elems[2]+self.nullpunkt["y"][self.nullpunktnr])
             self.position["z"].append(elems[3]+self.nullpunkt["z"][self.nullpunktnr])
             self.position["makro"].append(self.akt_makro[-1])
-            #print(str(len(self.position["x"]))+" abs x:"+str(self.position["x"][-1])+" y:"+str(self.position["y"][-1]))
-            self.update_XYZp()
-            #print(self.variables)
             
+            self.update_XYZp()
                 
         elif not(re.findall(r'Ixyz',line))==[]:
-            #print(line)
             elems=line.lstrip().lstrip("Ixyz").replace(" ","").split(",")
             
             for i,elem in enumerate(elems):
@@ -183,11 +177,10 @@ class Datprog:
             self.position["y"].append(self.position["y"][-1]+elems[2])
             self.position["z"].append(self.position["z"][-1]+elems[3])
             self.position["makro"].append(self.akt_makro[-1])
-            #print(str(len(self.position["x"]))+" rel x:"+str(self.position["x"][-1])+" y:"+str(self.position["y"][-1]))
+            
             self.update_XYZp()
 
         elif not(re.findall(r'Dispon',line))==[]:
-            #print(line)
             elems=line.lstrip().lstrip("Dispon").lstrip("_links").replace(" ","").split(",")
             
             for i,elem in enumerate(elems):
@@ -199,11 +192,10 @@ class Datprog:
             self.position["y"].append(self.position["y"][-1])
             self.position["z"].append(elems[10]+self.nullpunkt["z"][self.nullpunktnr])
             self.position["makro"].append(self.akt_makro[-1])
-            #print(str(len(self.position["x"]))+" rel x:"+str(self.position["x"][-1])+" y:"+str(self.position["y"][-1]))
+            
             self.update_XYZp()
 
         elif not(re.findall(r'Dispoff',line))==[]:
-            #print(line)
             elems=line.lstrip().lstrip("Dispoff").replace(" ","").split(",")
             
             for i,elem in enumerate(elems):
@@ -229,7 +221,6 @@ class Datprog:
             self.position["y"].append(self.position["y"][-1])
             self.position["z"].append(elems[8]+self.nullpunkt["z"][self.nullpunktnr])
             self.position["makro"].append(self.akt_makro[-1])
-            #print(str(len(self.position["x"]))+" dispoff x:"+str(self.position["x"][-1])+" y:"+str(self.position["y"][-1]))
             self.update_XYZp()
             
         elif not(re.findall(r'Kreis',line))==[]:
@@ -247,11 +238,13 @@ class Datprog:
             aw=int(elems[4]) #Anfangswinkel
             ew=int(elems[5]) #Endwinkel
             d=float(elems[0]) #Durchmesser
+            zb=float(elems[10]) #Steigung pro Umdrehung
             r=d/2 #Radius
             ws=int(elems[3]) #Richtung: 0: anti-clockwise, -360: clockwise
 
             posx0=self.position["x"][-1]
             posy0=self.position["y"][-1]
+            posz0=self.position["z"][-1]
 
             anglestep=5
             
@@ -262,7 +255,7 @@ class Datprog:
                 for angle in range(aw,ew-anglestep,-anglestep):
                     self.position["x"].append(posx0-r*math.cos(math.radians(aw))+pol2cart(r,math.radians(angle))[0])                
                     self.position["y"].append(posy0-r*math.sin(math.radians(aw))+pol2cart(r,math.radians(angle))[1]) 
-                    self.position["z"].append(self.position["z"][-1])
+                    self.position["z"].append(posz0+(angle-aw)*zb/360)
                     self.position["makro"].append("kreis")
 
             elif ws==0:
@@ -271,12 +264,11 @@ class Datprog:
                 for angle in range(aw,ew+anglestep,anglestep):
                     self.position["x"].append(posx0-r*math.cos(math.radians(aw))+pol2cart(r,math.radians(angle))[0])                
                     self.position["y"].append(posy0-r*math.sin(math.radians(aw))+pol2cart(r,math.radians(angle))[1]) 
-                    self.position["z"].append(self.position["z"][-1])
+                    self.position["z"].append(posz0+(angle-aw)*zb/360) 
                     self.position["makro"].append("kreis")                    
             else:
                 print(line)
                 raise(ValueError("andere angaben als ws=0/-360 nicht unterstützt"))            
-            #print(str(len(self.position["x"]))+" kreis x:"+str(self.position["x"][-1])+" y:"+str(self.position["y"][-1]))
             self.update_XYZp()
 
         elif not(re.findall(r'Setrel',line))==[]:
@@ -437,7 +429,7 @@ def run_prog(prog,yaxis="y",xaxis="x"):
 #run_prog("VSE_alt")
 #dat=run_prog("VSE_neu_2")
 
-a=run_prog("MSE_neu","y")
-b=run_prog("MSE_alt","y")
-c=run_prog("MSE_neu","z")
-d=run_prog("MSE_alt","z")
+a=run_prog("MSE_neu","z")
+#b=run_prog("MSE_alt","y")
+#c=run_prog("MSE_neu","z")
+#d=run_prog("MSE_alt","z")
