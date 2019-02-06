@@ -1,435 +1,382 @@
-import re #regular expressions
+import re  # regular expressions
 import matplotlib.pyplot as plt
-import time
 import math
 import pandas as pd
-
-#Datron animator
-progs={"MKSV4K":"N:/Datron 5/Sicherung_2018-05-24/Disp/MKSV4_K.MCR",
-       "EB7_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/EB7_V_neu.MCR",
-       "EB7_neu2":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/EB7_V_neu2.MCR",
-       "EB7_neu4":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/EB7_V_neu4.MCR",
-       "EB7_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/EB7_V_alt.MCR",
-       "LF20_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LF20_36_V_alt.MCR",
-       "LF20_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LF20_36_V_neu.MCR",
-       "V20_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400V20_36_V_alt.MCR",
-       "V20_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400V20_36_V_neu.MCR",
-       "MDS_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MDS-M_V_alt.MCR",
-       "MDS_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MDS-M_V_neu.MCR",
-       "VSE_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400VSE_V_alt.MCR",
-       "VSE_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400VSE_V_neu.MCR",
-       "VSE_neu_2":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400VSE_V_neu_2.MCR",
-       "LC2_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LC2_V_alt.MCR",
-       "LC2_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LC2_V_neu.MCR",
-       "El3_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/El3_V_alt.MCR",
-       "El3_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/El3_V_neu.MCR",
-       "mksv_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MKSV4_V_alt.MCR",
-       "mksv_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MKSV4_V_neu.MCR",
-       "CBU_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/CBU-M_V_alt.MCR",
-       "CBU_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/CBU-M_V_neu.MCR",
-       "DPS6":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/DPS6_K.MCR",
-       "MSE_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MSE_V.MCR",
-       "MSE_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MSE_V_neu.MCR",
-       "test":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/test.txt"
-       }
-
 import numpy as np
 
+
 def cart2pol(x, y):
-    rho = np.sqrt(x**2 + y**2)
+    rho = np.sqrt(x ** 2 + y ** 2)
     phi = np.arctan2(y, x)
-    return(rho, phi)
+    return (rho, phi)
+
 
 def pol2cart(rho, phi):
     x = rho * np.cos(phi)
     y = rho * np.sin(phi)
-    return(x, y)
+    return (x, y)
+
 
 def heav(number):
-    if number>=0:
+    if number >= 0:
         return 1
     else:
         return 0
+
 
 def zero(number):
-    if number==0:
+    if number == 0:
         return 0
     else:
         return 1
 
-def floor (number):
+
+def floor(number):
     return math.floor(number)
 
-def ceil (number):
+
+def ceil(number):
     return math.ceil(number)
+
 
 def is_number(s):
     try:
         float(s)
-        return(True)
+        return (True)
     except ValueError:
-        return(False)
+        return (False)
+
 
 class Datprog:
-    def __init__(self,fname):
-        self.name=fname
+    """ Read the MCR file and compute dispensing path
+     fname: full path to the mcr file
+
+    """
+    def __init__(self, fname):
+        self.name = fname
         self.read_file()
         self.get_markierungen()
         self.get_submakros()
-        self.stack=[0]
-        self.position={"x":[0],"y":[0],"z":[0],"makro":["main"]}
-        self.variables={"Zp":0,"Xp":0,"Yp":0,"Araupe":0,"Time":0}#was ist *p - aktuelle Koordinate (Axyz kann so manche Koordinaten als relativ akzeptieren)
-        self.nullpunktnr=0
-        self.nullpunkt={"x":[0,0,0,0,0,0,0,0],"y":[0,0,0,0,0,0,0,0],"z":[0,0,0,0,0,0,0,0]}
-        self.akt_makro=["main"]
-
-    def get_path(self):
-        return(progs[self.name])
+        self.stack = [0]
+        self.position = {"x": [0], "y": [0], "z": [0], "makro": ["main"]}
+        self.variables = {"Zp": 0, "Xp": 0, "Yp": 0, "Araupe": 0,
+                          "Time": 0}  # was ist *p - aktuelle Koordinate (Axyz kann so manche Koordinaten als relativ akzeptieren)
+        self.nullpunktnr = 0
+        self.nullpunkt = {"x": [0, 0, 0, 0, 0, 0, 0, 0], "y": [0, 0, 0, 0, 0, 0, 0, 0], "z": [0, 0, 0, 0, 0, 0, 0, 0]}
+        self.akt_makro = ["main"]
+        self.go_through()
 
     def read_file(self):
-        self.prog=[]
+        self.prog = []
 
-        with open(self.get_path(),"r") as f:
+        with open(self.name, "r",encoding="cp1252") as f:
             for line in f:
                 self.prog.append(line)
-        
 
     def get_markierungen(self):
-        markierungen={}
+        markierungen = {}
         for linenum, line in enumerate(self.prog):
             if line.startswith("Markierung"):
-                marknr=re.findall(r'\b\d+\b',line)[0] #Markierung Nr
-                markline=linenum #Markierung Line
-                markierungen[marknr]=markline 
-        self.markierungen=markierungen
+                marknr = re.findall(r'\b\d+\b', line)[0]  # Markierung Nr
+                markline = linenum  # Markierung Line
+                markierungen[marknr] = markline
+        self.markierungen = markierungen
 
     def get_submakros(self):
-        #returns dictionary {makroname:[startline,endline]}
-        submakros={}
+        # returns dictionary {makroname:[startline,endline]}
+        submakros = {}
         for linenum, line in enumerate(self.prog):
             if line.startswith("("):
-                #Submakro start
-                startline=linenum
-                #Markierung Line
+                # Submakro start
+                startline = linenum
+                # Markierung Line
             if line.startswith(")"):
-                #Matching submakro end
-                endline=linenum
-                makroname=re.findall(r'\) (.*);',line)[0] #Submakro name
-                submakros[makroname]=[startline,endline]
-        self.submakros=submakros
+                # Matching submakro end
+                endline = linenum
+                makroname = re.findall(r'\) (.*);', line)[0]  # Submakro name
+                submakros[makroname] = [startline, endline]
+        self.submakros = submakros
 
-    def step(self,line_number):
-        #for line in self.prog:
-        nextline=line_number+1 # default
+    def step(self, line_number):
+        # for line in self.prog:
+        nextline = line_number + 1  # default
+        # print(self.stack)
 
-        #identifizierung von main procedure - wenn der stack leer ist 
-        submakro_starts=[val[0] for val in list(self.submakros.values())]
-        submakro_ends=[val[1] for val in list(self.submakros.values())]
-        if len(self.stack)==1 and (line_number in submakro_starts):
-            nextline=submakro_ends[submakro_starts.index(line_number)]+1
-            return(nextline)        
-        
-        line=re.findall(r'[^;]*',self.prog[line_number])[0] #remove comments
-        #print(line)
-        
-        if not(re.findall(r'=',line))==[]:
-            lhs=re.findall(r'[^=]*',line)[0].strip()
-            rhs=re.findall(r'=(.*)',line)[0].strip()
-            #print(line)                
+        # identifizierung von main procedure - wenn der stack leer ist
+        submakro_starts = [val[0] for val in list(self.submakros.values())]
+        submakro_ends = [val[1] for val in list(self.submakros.values())]
+        if len(self.stack) == 1 and (line_number in submakro_starts):
+            nextline = submakro_ends[submakro_starts.index(line_number)] + 1
+            return (nextline)
 
-            for key in sorted(self.variables,reverse=True):
-                rhs=rhs.replace(key,str(self.variables[key]))
+        line = re.findall(r'[^;]*', self.prog[line_number])[0]  # remove comments
+        # print(line)
+
+        if not (re.findall(r'=', line)) == []:
+            lhs = re.findall(r'[^=]*', line)[0].strip()
+            rhs = re.findall(r'=(.*)', line)[0].strip()
+            # print(line)
+
+            for key in sorted(self.variables, reverse=True):
+                rhs = rhs.replace(key, str(self.variables[key]))
 
             try:
-                rhs=eval(rhs)
+                rhs = eval(rhs)
 
             except SyntaxError as e:
-                print("Syntax Error: Zeile übersprungen "+str(e))
+                print("Syntax Error: Zeile übersprungen " + str(e))
             except NameError as e:
-                print("Name Error: Zeile übersprungen "+str(e))
-            
-            self.variables[lhs]=rhs
+                print("Name Error: Zeile übersprungen " + str(e))
 
-        elif not(re.findall(r'Axyz',line))==[]:
-            elems=line.lstrip().lstrip("Axyz").replace(" ","").split(",")                
+            self.variables[lhs] = rhs
 
-            for i,elem in enumerate(elems):
-                for key in sorted(self.variables,reverse=True):
-                    elem=elem.replace(key,str(self.variables[key]))
-                elems[i]=eval(elem)
+        elif not (re.findall(r'Axyz', line)) == []:
+            elems = line.lstrip().lstrip("Axyz").replace(" ", "").split(",")
 
-            self.position["x"].append(elems[1]+self.nullpunkt["x"][self.nullpunktnr])
-            self.position["y"].append(elems[2]+self.nullpunkt["y"][self.nullpunktnr])
-            self.position["z"].append(elems[3]+self.nullpunkt["z"][self.nullpunktnr])
+            for i, elem in enumerate(elems):
+                for key in sorted(self.variables, reverse=True):
+                    elem = elem.replace(key, str(self.variables[key]))
+                elems[i] = eval(elem)
+
+            self.position["x"].append(elems[1] + self.nullpunkt["x"][self.nullpunktnr])
+            self.position["y"].append(elems[2] + self.nullpunkt["y"][self.nullpunktnr])
+            self.position["z"].append(elems[3] + self.nullpunkt["z"][self.nullpunktnr])
             self.position["makro"].append(self.akt_makro[-1])
-            
-            self.update_XYZp()
-                
-        elif not(re.findall(r'Ixyz',line))==[]:
-            elems=line.lstrip().lstrip("Ixyz").replace(" ","").split(",")
-            
-            for i,elem in enumerate(elems):
-                for key in sorted(self.variables,reverse=True):
-                    elem=elem.replace(key,str(self.variables[key]))
-                elems[i]=eval(elem)
-                
-            self.position["x"].append(self.position["x"][-1]+elems[1])
-            self.position["y"].append(self.position["y"][-1]+elems[2])
-            self.position["z"].append(self.position["z"][-1]+elems[3])
-            self.position["makro"].append(self.akt_makro[-1])
-            
+
             self.update_XYZp()
 
-        elif not(re.findall(r'Dispon',line))==[]:
-            elems=line.lstrip().lstrip("Dispon").lstrip("_links").replace(" ","").split(",")
-            
-            for i,elem in enumerate(elems):
-                for key in sorted(self.variables,reverse=True):
-                    elem=elem.replace(key,str(self.variables[key]))
-                elems[i]=eval(elem)
-                
-            self.position["x"].append(self.position["x"][-1])
-            self.position["y"].append(self.position["y"][-1])
-            self.position["z"].append(elems[10]+self.nullpunkt["z"][self.nullpunktnr])
+        elif not (re.findall(r'Ixyz', line)) == []:
+            elems = line.lstrip().lstrip("Ixyz").replace(" ", "").split(",")
+
+            for i, elem in enumerate(elems):
+                for key in sorted(self.variables, reverse=True):
+                    elem = elem.replace(key, str(self.variables[key]))
+                elems[i] = eval(elem)
+
+            self.position["x"].append(self.position["x"][-1] + elems[1])
+            self.position["y"].append(self.position["y"][-1] + elems[2])
+            self.position["z"].append(self.position["z"][-1] + elems[3])
             self.position["makro"].append(self.akt_makro[-1])
-            
+
             self.update_XYZp()
 
-        elif not(re.findall(r'Dispoff',line))==[]:
-            elems=line.lstrip().lstrip("Dispoff").replace(" ","").split(",")
-            
-            for i,elem in enumerate(elems):
-                for key in sorted(self.variables,reverse=True):
-                    elem=elem.replace(key,str(self.variables[key]))
-                elems[i]=eval(elem)
+        elif not (re.findall(r'Dispon', line)) == []:
+            elems = line.lstrip().lstrip("Dispon").lstrip("_links").replace(" ", "").split(",")
 
-            if elems[1]==180 or elems[5]==0:
-                self.position["x"].append(self.position["x"][-1]+elems[5])
-                self.position["y"].append(self.position["y"][-1])
-                self.position["z"].append(self.position["z"][-1])
-                self.position["makro"].append(self.akt_makro[-1])
-            elif elems[1]==270 or elems[5]==0:
-                self.position["x"].append(self.position["x"][-1])
-                self.position["y"].append(self.position["y"][-1]+elems[5])
-                self.position["z"].append(self.position["z"][-1])
-                self.position["makro"].append(self.akt_makro[-1])
-            else:
-                raise ValueError("Nicht implementiert für diese Angaben von Dispoff" + line)
-                exit
+            for i, elem in enumerate(elems):
+                for key in sorted(self.variables, reverse=True):
+                    elem = elem.replace(key, str(self.variables[key]))
+                elems[i] = eval(elem)
 
             self.position["x"].append(self.position["x"][-1])
             self.position["y"].append(self.position["y"][-1])
-            self.position["z"].append(elems[8]+self.nullpunkt["z"][self.nullpunktnr])
+            self.position["z"].append(elems[10] + self.nullpunkt["z"][self.nullpunktnr])
+            self.position["makro"].append(self.akt_makro[-1])
+
+            self.position["x"].append(self.position["x"][-1] + pol2cart(elems[2], math.radians(elems[1] + 180))[0])
+            self.position["y"].append(self.position["y"][-1] + pol2cart(elems[2], math.radians(elems[1] + 180))[1])
+            self.position["z"].append(self.position["z"][-1] - elems[3])
+            self.position["makro"].append(self.akt_makro[-1])
+
+            self.position["x"].append(self.position["x"][-1] - pol2cart(elems[2], math.radians(elems[1] + 180))[0])
+            self.position["y"].append(self.position["y"][-1] - pol2cart(elems[2], math.radians(elems[1] + 180))[1])
+            self.position["z"].append(self.position["z"][-1] + elems[3])
+            self.position["makro"].append(self.akt_makro[-1])
+
+            self.update_XYZp()
+
+        elif not (re.findall(r'Dispoff', line)) == []:
+            elems = line.lstrip().lstrip("Dispoff").replace(" ", "").split(",")
+
+            for i, elem in enumerate(elems):
+                for key in sorted(self.variables, reverse=True):
+                    elem = elem.replace(key, str(self.variables[key]))
+                elems[i] = eval(elem)
+
+            self.position["x"].append(self.position["x"][-1] + pol2cart(elems[5], math.radians(elems[1] + 180))[0])
+            self.position["y"].append(self.position["y"][-1] + pol2cart(elems[5], math.radians(elems[1] + 180))[1])
+            self.position["z"].append(self.position["z"][-1] + elems[6])
+            self.position["makro"].append(self.akt_makro[-1])
+
+            self.position["x"].append(self.position["x"][-1])
+            self.position["y"].append(self.position["y"][-1])
+            self.position["z"].append(elems[8] + self.nullpunkt["z"][self.nullpunktnr])
             self.position["makro"].append(self.akt_makro[-1])
             self.update_XYZp()
-            
-        elif not(re.findall(r'Kreis',line))==[]:
-            elems=line.lstrip().lstrip("Kreis").replace(" ","").split(",")
-            
-            for i,elem in enumerate(elems):
-                for key in sorted(self.variables,reverse=True):
-                    elem=elem.replace(key,str(self.variables[key]))
+
+        elif not (re.findall(r'Kreis', line)) == []:
+            elems = line.lstrip().lstrip("Kreis").replace(" ", "").split(",")
+
+            for i, elem in enumerate(elems):
+                for key in sorted(self.variables, reverse=True):
+                    elem = elem.replace(key, str(self.variables[key]))
                 try:
-                    elems[i]=eval(elem)
+                    elems[i] = eval(elem)
                 except NameError as e:
-                    print("Name Error: Zeile übersprungen "+str(e))
-                    return(nextline)
+                    print("Name Error: Zeile übersprungen " + str(e))
+                    return (nextline)
 
-            aw=int(elems[4]) #Anfangswinkel
-            ew=int(elems[5]) #Endwinkel
-            d=float(elems[0]) #Durchmesser
-            zb=float(elems[10]) #Steigung pro Umdrehung
-            r=d/2 #Radius
-            ws=int(elems[3]) #Richtung: 0: anti-clockwise, -360: clockwise
+            aw = int(elems[4])  # Anfangswinkel
+            ew = int(elems[5])  # Endwinkel
+            d = float(elems[0])  # Durchmesser
+            zb = float(elems[10])  # Steigung pro Umdrehung
+            r = d / 2  # Radius
+            ws = int(elems[3])  # Richtung: 0: anti-clockwise, -360: clockwise
 
-            posx0=self.position["x"][-1]
-            posy0=self.position["y"][-1]
-            posz0=self.position["z"][-1]
+            posx0 = self.position["x"][-1]
+            posy0 = self.position["y"][-1]
+            posz0 = self.position["z"][-1]
 
-            anglestep=5
-            
-            if ws==-360:
-                if aw<ew:
-                    aw=aw+360
-                    
-                for angle in range(aw,ew-anglestep,-anglestep):
-                    self.position["x"].append(posx0-r*math.cos(math.radians(aw))+pol2cart(r,math.radians(angle))[0])                
-                    self.position["y"].append(posy0-r*math.sin(math.radians(aw))+pol2cart(r,math.radians(angle))[1]) 
-                    self.position["z"].append(posz0+(angle-aw)*zb/360)
+            anglestep = 5
+
+            if ws == -360:
+                if aw < ew:
+                    aw = aw + 360
+
+                for angle in range(aw, ew - anglestep, -anglestep):
+                    self.position["x"].append(
+                        posx0 - r * math.cos(math.radians(aw)) + pol2cart(r, math.radians(angle))[0])
+                    self.position["y"].append(
+                        posy0 - r * math.sin(math.radians(aw)) + pol2cart(r, math.radians(angle))[1])
+                    self.position["z"].append(posz0 + (angle - aw) * zb / 360)
                     self.position["makro"].append("kreis")
 
-            elif ws==0:
-                if ew<aw:
-                  ew=ew+360
-                for angle in range(aw,ew+anglestep,anglestep):
-                    self.position["x"].append(posx0-r*math.cos(math.radians(aw))+pol2cart(r,math.radians(angle))[0])                
-                    self.position["y"].append(posy0-r*math.sin(math.radians(aw))+pol2cart(r,math.radians(angle))[1]) 
-                    self.position["z"].append(posz0+(angle-aw)*zb/360) 
-                    self.position["makro"].append("kreis")                    
+            elif ws == 0:
+                if ew < aw:
+                    ew = ew + 360
+                for angle in range(aw, ew + anglestep, anglestep):
+                    self.position["x"].append(
+                        posx0 - r * math.cos(math.radians(aw)) + pol2cart(r, math.radians(angle))[0])
+                    self.position["y"].append(
+                        posy0 - r * math.sin(math.radians(aw)) + pol2cart(r, math.radians(angle))[1])
+                    self.position["z"].append(posz0 + (angle - aw) * zb / 360)
+                    self.position["makro"].append("kreis")
             else:
                 print(line)
-                raise(ValueError("andere angaben als ws=0/-360 nicht unterstützt"))            
+                raise (ValueError("andere angaben als ws=0/-360 nicht unterstützt"))
             self.update_XYZp()
 
-        elif not(re.findall(r'Setrel',line))==[]:
-            elems=line.lstrip().lstrip("Setrel").replace(" ","").split(",")
+        elif not (re.findall(r'Setrel', line)) == []:
+            elems = line.lstrip().lstrip("Setrel").replace(" ", "").split(",")
 
-            self.nullpunkt["x"][self.nullpunktnr]=self.position["x"][-1]-float(elems[0])
-            self.nullpunkt["y"][self.nullpunktnr]=self.position["y"][-1]-float(elems[1])
-            self.nullpunkt["z"][self.nullpunktnr]=self.position["z"][-1]-float(elems[2])
+            self.nullpunkt["x"][self.nullpunktnr] = self.position["x"][-1] - float(elems[0])
+            self.nullpunkt["y"][self.nullpunktnr] = self.position["y"][-1] - float(elems[1])
+            self.nullpunkt["z"][self.nullpunktnr] = self.position["z"][-1] - float(elems[2])
 
-        elif not(re.findall(r'Relsp',line))==[]:
-            self.nullpunktnr=int(line[-1])
+        elif not (re.findall(r'Relsp', line)) == []:
+            self.nullpunktnr = int(line[-1])
 
-        elif not(re.findall(r'Mal',line))==[]:
-            #print(line)
-            #print(self.variables)
-            times=self.variables[line.lstrip().lstrip("Mal").replace(" ","")]
-            #print(times)
-            makroline=self.prog[line_number+1]
-            for i in range(times-1):
-                #print(makroline)
-                self.prog.insert(line_number+1,makroline)
+        elif not (re.findall(r'Mal', line)) == []:
+            # print(line)
+            # print(self.variables)
+            times = self.variables[line.lstrip().lstrip("Mal").replace(" ", "")]
+            # print(times)
+            makroline = self.prog[line_number + 1]
+            for i in range(times - 1):
+                # print(makroline)
+                self.prog.insert(line_number + 1, makroline)
 
-            if times<=0:
-                return(nextline+1)
+            if times <= 0:
+                return (nextline + 1)
 
+        elif not (re.findall(r'^Submakro', line.lstrip())) == []:
+            # run submacro
 
-        elif not(re.findall(r'^Submakro',line.lstrip()))==[]:
-            #run submacro
-            
-            for key in sorted(self.submakros,reverse=True):
+            for key in sorted(self.submakros, reverse=True):
                 if key in line:
-                    nextline=self.submakros[key][0]
-                    self.stack.append(line_number+1)
+                    nextline = self.submakros[key][0]
+                    self.stack.append(line_number + 1)
                     self.akt_makro.append(key)
                     break
 
-        elif not(re.findall(r'^\)',line))==[]:
-            #return control
-            nextline=self.stack.pop()
+        elif not (re.findall(r'^\)', line)) == []:
+            # return control
+            nextline = self.stack.pop()
             self.akt_makro.pop()
 
-        return(nextline)
+        return (nextline)
 
     def update_XYZp(self):
-        self.variables["Xp"]=self.position["x"][-1]-self.nullpunkt["x"][self.nullpunktnr]
-        self.variables["Yp"]=self.position["y"][-1]-self.nullpunkt["y"][self.nullpunktnr]
-        self.variables["Zp"]=self.position["z"][-1]-self.nullpunkt["z"][self.nullpunktnr]
+        self.variables["Xp"] = self.position["x"][-1] - self.nullpunkt["x"][self.nullpunktnr]
+        self.variables["Yp"] = self.position["y"][-1] - self.nullpunkt["y"][self.nullpunktnr]
+        self.variables["Zp"] = self.position["z"][-1] - self.nullpunkt["z"][self.nullpunktnr]
 
     def go_through(self):
-        nextline=self.step(0)
+        nextline = self.step(0)
 
-        while len(self.stack)>0:
-            if nextline==len(self.prog) and len(self.stack)==1:
+        while len(self.stack) > 0:
+            if nextline == len(self.prog) and len(self.stack) == 1:
                 break
 
-            nextline=self.step(nextline)
+            nextline = self.step(nextline)
 
-            if len(self.stack)>20:
+            if len(self.stack) > 20:
                 break
 
-def anim(datronObjekt):
+
+def anim(dat,interval=500):
     import numpy as np
     import matplotlib.pyplot as plt
     from matplotlib.animation import FuncAnimation
 
     fig, ax = plt.subplots()
     xdata, ydata = [], []
-    ln, = plt.plot([], [], 'bo', animated=True)#go
+    ln, = plt.plot([], [], 'bo', animated=True)  # go
 
     def init():
-        ax.set_xlim(min(datronObjekt.position["x"])-10, max(datronObjekt.position["x"])+10)
-        ax.set_ylim(min(datronObjekt.position["y"])-10, max(datronObjekt.position["y"])+10)
+        ax.set_xlim(min(dat.position["x"]) - 10, max(dat.position["x"]) + 10)
+        ax.set_ylim(min(dat.position["y"]) - 10, max(dat.position["y"]) + 10)
         ln.set_data([], [])
         return ln,
 
     def update(frame):
-        #print(frame)
-        #print(datronObjekt.position["x"][frame])
-        xdata.append(datronObjekt.position["x"][frame])
-        ydata.append(datronObjekt.position["y"][frame])
-        #xdata=datronObjekt.position["x"][frame]
-        #ydata=datronObjekt.position["y"][frame]
+        xdata.append(dat.position["x"][frame])
+        ydata.append(dat.position["y"][frame])
         ln.set_data(xdata, ydata)
         return ln,
 
-    ani = FuncAnimation(fig, update, frames=np.arange(1,len(datronObjekt.position["x"])),
-                        init_func=init, blit=True,interval=500)
-    plt.show()    
+    ani = FuncAnimation(fig, update, frames=np.arange(1, len(dat.position["x"])),
+                        init_func=init, blit=True, interval=interval)
+    plt.show()
 
 
 pd.set_option('expand_frame_repr', False)
 pd.set_option('display.max_rows', 500)
-  
-def run_prog(prog,yaxis="y",xaxis="x"):
-    dat=Datprog(prog)
-    dat.go_through()
 
-    df=pd.DataFrame(dat.position)
-    df = df[df['makro'] != "kreis"].reset_index()
-    print(df)
-    
-    #plt.subplot(211)
-    plt.plot(dat.position[xaxis],dat.position[yaxis],"b-")
 
-    k=0
-    for i,ii in enumerate(dat.position["makro"]):
-        if dat.position["makro"][i]!="kreis":
-            plt.annotate(k,xy=(dat.position[xaxis][i],dat.position[yaxis][i]),fontsize=8)
-            k=k+1 
+def plot_path(dat, yaxis="y", xaxis="x"):
+
+    plt.plot(dat.position[xaxis], dat.position[yaxis], "b-")
+
+    k = 0
+    for i, ii in enumerate(dat.position["makro"]):
+        if dat.position["makro"][i] != "kreis":
+            plt.annotate(k, xy=(dat.position[xaxis][i], dat.position[yaxis][i]), fontsize=8)
+            k = k + 1
 
     plt.ylabel(yaxis)
     plt.xlabel(xaxis)
-    plt.title(prog)
+    plt.title(dat.name)
     plt.grid(b=True, which='major', color='r', linestyle='--')
     plt.grid(b=True, which='minor', color='g', linestyle='--')
     plt.minorticks_on()
-    #plt.xlim(-60,270)
-    #plt.ylim(-50,350)
-    
+
     plt.show()
-    
-    #anim(dat)
-    x_0=0
-    y_0=0
-    length=0
-    
-    for x,y in zip(dat.position[xaxis],dat.position[yaxis]):
-        length+=math.sqrt((x-x_0)*(x-x_0)+(y-y_0)*(y-y_0))
-        x_0=x
-        y_0=y
 
-    print("länge: "+str(length))
-    return(dat)
-    
-#run_prog("mksv_alt")
-#dat=run_prog("mksv_neu")     
-#run_prog("El3_alt")
-#run_prog("El3_neu") 
-#run_prog("CBU_alt")
-#run_prog("CBU_neu")  
-#g=run_prog("DPS6")
-#g=run_prog("MSE_alt")
-#g=run_prog("EB7_neu4")
-#g=run_prog("EB7_neu")
-#run_prog("V20_neu")
-#run_prog("V20_alt")
-#run_prog("LF20_neu")
-#run_prog("LF20_alt")
-#run_prog("V20_neu")
-#run_prog("MDS_neu")
-#run_prog("MDS_alt")
-#run_prog("EB7_alt")
-#run_prog("EB7_neu2")
-#run_prog("LC2_neu")
-#run_prog("LC2_alt")
-#run_prog("VSE_neu")
-#run_prog("VSE_neu")
-#run_prog("VSE_alt")
-#dat=run_prog("VSE_neu_2")
+    x_0 = 0
+    y_0 = 0
+    length = 0
 
-a=run_prog("MSE_neu","z")
-#b=run_prog("MSE_alt","y")
-#c=run_prog("MSE_neu","z")
-#d=run_prog("MSE_alt","z")
+    for x, y in zip(dat.position[xaxis], dat.position[yaxis]):
+        length += math.sqrt((x - x_0) * (x - x_0) + (y - y_0) * (y - y_0))
+        x_0 = x
+        y_0 = y
+
+    print("länge: " + str(length))
+
+
+"""Usage: 
+a = Datprog("CBU-M_V_neu.mcr") #generate Datron Object
+plot_path(a, "y", "x") #plot path
+anim(a,100) #animate path
+"""
