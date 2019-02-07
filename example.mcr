@@ -37,12 +37,12 @@ _maske Mseerkennung, 0, 0, "MSE_Erkennung";
 _maske Pause_rechts, 0, 0, "Pauseposition anfahren";
 
 (
-  Amax = 30;!Maximale Anzahl an Teilen pro Träger!
-  Ax = 30;!Abstand der Teile zueinander auf Träger in X-Richtung!
-  Ay = 40;!Abstand der Teile zueinander auf Träger in Y-Richtung!
+  Amax = 30;!Maximale Anzahl an Teilen pro TrÃ¤ger!
+  Ax = 30;!Abstand der Teile zueinander auf TrÃ¤ger in X-Richtung!
+  Ay = 40;!Abstand der Teile zueinander auf TrÃ¤ger in Y-Richtung!
   Anx = 10;!Anzahl der Spalten!
   Any = 3;!Anzahl der Reihen!
-  Wt_hoehe = 49.7;!Soll-Höhe des WT!
+  Wt_hoehe = 49.7;!Soll-HÃ¶he des WT!
   Teilnichtda = 0;
   ; !---------------------------------------------------------------!
   Amaxr = Amax;
@@ -52,8 +52,8 @@ _maske Pause_rechts, 0, 0, "Pauseposition anfahren";
   Auf_ab 0;!Schlitten auf!
   Relsp 1;
   Mkoord 5, 0;!Koordinatensystem Laser!
-  Axyz 1, -280, -50, Zp, 0, 0;!WT-Höhenposition X - Y!
-  Axyz 1, Xp, Yp, -6.3, 0, 0;!WT-Höhenposition!
+  Axyz 1, -280, -50, Zp, 0, 0;!WT-HÃ¶henposition X - Y!
+  Axyz 1, Xp, Yp, -6.3, 0, 0;!WT-HÃ¶henposition!
   Submakro Abstandsanzeige;
   Axyz 1, Xp, Yp, 1.41, 0, 0;!Z - erste Position!
   Axyz 1, -260, -80, Zp, 0, 0;!erste Position vorne links-letztes Teil vom Bonden!
@@ -64,7 +64,7 @@ _maske Pause_rechts, 0, 0, "Pauseposition anfahren";
   Bedingung Teilnichtda, 0, 1, 10, 200;
   ; !---------------------------------------------------------------!
   Markierung 10;
-  Bedingung Anxr, 0, 1, 40, 0;!in der letzten Zeile nicht mehr nach rechts möglich!
+  Bedingung Anxr, 0, 1, 40, 0;!in der letzten Zeile nicht mehr nach rechts mÃ¶glich!
   Anxr = Anxr - 1;
   Ixyz 1, Ax, 0, 0, 0, 0;
   Einaus 1, 150, Teilnichtda, 5, 0, 1;
@@ -76,7 +76,7 @@ _maske Pause_rechts, 0, 0, "Pauseposition anfahren";
   ; !----------------------------------------------------------------!
   Markierung 40;
   Anyr = Anyr + 1;
-  Bedingung Anyr, 0, Any, 200, 0;!in der letzten Reihe nicht mehr nach hinten möglich!
+  Bedingung Anyr, 0, Any, 200, 0;!in der letzten Reihe nicht mehr nach hinten mÃ¶glich!
   Ixyz 1, 0, Ay, 0, 0, 0;
   Einaus 1, 150, Teilnichtda, 5, 0, 1;
   Bedingung Teilnichtda, 0, 1, 40, 200;
@@ -95,11 +95,11 @@ _maske Pause_rechts, 0, 0, "Pauseposition anfahren";
   Einaus 0, 200, 0, 2, 0, 1;!Datron nicht fertig!
   Einaus 0, 200, 0, 3, 0, 1;!Datron nicht betriebsbereit!
   Einaus 0, 200, 1, 8, 0, 1;!gelb an!
-  Text 1 = "Bitte bestätigen wenn Kartusche gewechselt wurde";
+  Text 1 = "Bitte bestÃ¤tigen wenn Kartusche gewechselt wurde";
   Melde 1, 0, 0, 0;
   Auf_ab 0;
   ; !Ixyz 1, -98, 478, 25, 0, 0;!
-  ; !Submakro Nmess_kartuschenwechsel; noch nicht möglich!
+  ; !Submakro Nmess_kartuschenwechsel; noch nicht mÃ¶glich!
   Position 10, 0;
   Ixyz 1, 0, 0, 50, 0, 0;
   ; !Ixyz 1, 0, -40, -50, 0, 0;!
@@ -180,7 +180,7 @@ _maske Pause_rechts, 0, 0, "Pauseposition anfahren";
   ; !V_mseerkennung = 1;!
 ) Mseerkennung;
 (
-  ; !--------- Rückzug bei UV-Verguss ------------------------------!
+  ; !--------- RÃ¼ckzug bei UV-Verguss ------------------------------!
   Dispon 2, 0, 0.5, 1, Zp, 1, 1, 2.5, 75, 10, Zp, Zp, 1;
   ; !Dispon 2, 0, 0.5, 0.4, Zp, 1, 1, 1.5, 75, 10, Zp, Zp, 1;!
   Dispoff 2, 0, 0, 0, 1, 0, 0.1, 1, Zp, 0;
@@ -233,7 +233,7 @@ _maske Pause_rechts, 0, 0, "Pauseposition anfahren";
   Verweile 1, 1, 0, 0, 0, 0, 0;
 ) Pause_rechts;
 (
-  ; !-----------------Spülen------------------!
+  ; !-----------------SpÃ¼len------------------!
   V_spuelen = V_spuelen + 1;
   Bedingung V_spuelen, 0, 4, 0, 100;
   V_spuelen = 1;
@@ -278,8 +278,7 @@ Verweile 0, 1, 0, 151, 1, 1, 5;!wenn USEROUT1 = 0 auf 5!
 Text 1 = "C:\Program Files\Datron\DatronCNC\Disp\Typauswahl.mcr";
 Mladen 1, 0;
 Markierung 5;
-; !Datron Innenzahnrad 0,3 mit grau kon. Nadel!
-; !Material Wacker Semicosil 949 UV!
+
 ; !Vordruck 1 bar!
 V_mseerkennung = 0;!Variable damit MSEerkennung nur zu Programmbeginn abgefragt wird!
 Zeitbispause = 200;
@@ -305,7 +304,7 @@ Markierung 10;
 Amax = 30;!nur wichtig wenn Teileerkennung deaktiviert!
 ; !-------------------------------!
 Bedingung Grafik, 0, 0, 0, 110;
-Position 6, 2;!Nullpunkt laden für CBU_M_Verguss!
+Position 6, 2;!Nullpunkt laden!
 Mkoord 1, 0;!Koordinatensystem linker Kopf!
 Position 12, 0;
 Verweile 0, 1, 0, 3001, -3, 0.5, 220;!wenn Kartusche leer rechts auf 220!
@@ -341,19 +340,19 @@ n_teile_hinten=ceil(Amax/Any); Anzahl der Teile in hinterer Reihe, Any ist Anzah
 n_teile_vorne=floor(Amax/Any); Anzahl der Teile in vorderer Reihe
 n_teile_mitte=Amax-n_teile_hinten-n_teile_vorne
 
-Y_start_hinten = 6; Y-koordinate für die hintere Reihe
-Y_start_mitte = Y_start_hinten - Ay; Y-Koordinate für die mittlere Reihe
-Y_start_vorne = Y_start_hinten - 2* Ay; Y-Koordinate für die vordere Reihe
+Y_start_hinten = 6; Y-koordinate fÃ¼r die hintere Reihe
+Y_start_mitte = Y_start_hinten - Ay; Y-Koordinate fÃ¼r die mittlere Reihe
+Y_start_vorne = Y_start_hinten - 2* Ay; Y-Koordinate fÃ¼r die vordere Reihe
 
-X_start= 8 - Ax * n_teile_vorne; X-Koordinate für den ersten Bauteil vorne
+X_start= 8 - Ax * n_teile_vorne; X-Koordinate fÃ¼r den ersten Bauteil vorne
 Mal n_teile_vorne; 
 Submakro Bauteil_vorne;
 
-X_start= 8 + Ax; X-Koordinate für den ersten Bauteil in der Mitte
+X_start= 8 + Ax; X-Koordinate fÃ¼r den ersten Bauteil in der Mitte
 Mal n_teile_mitte;
 Submakro Bauteil_mitte;
 
-X_start= 8 - Ax * n_teile_hinten+Ax; X-Koordinate für den ersten Bauteil vorne
+X_start= 8 - Ax * n_teile_hinten+Ax; X-Koordinate fÃ¼r den ersten Bauteil vorne
 Mal n_teile_hinten; 
 Submakro Bauteil_hinten;
 
