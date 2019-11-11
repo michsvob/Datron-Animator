@@ -1,2 +1,5 @@
 # Datron-Animator
-Visualisierung von Datron CNC MCR Programmen / Visualisation of paths programmed Datron CNC machine (MCR files)
+Visualisation of trajectories programmed for Datron CNC machines (MCR files)
+
+For more information see the my project webpage:
+https://michsvob.github.io/Portfolio/datron.html#
