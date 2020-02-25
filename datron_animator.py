@@ -9,9 +9,11 @@ import numpy as np
 
 config=configparser.ConfigParser(comment_prefixes=('#'),allow_no_value=True,strict=False)
 
-icat={"DatronKL1":"I_Cat.ini",
+icat={"DatronKL1":"I_CAT_KL1.ini",
+      "DatronKL4_V":"I_CAT_KL4_V.ini",
+      "DatronKL4_K":"I_CAT_KL_4_KL.ini"
       "DatronKL3":"I_CAT_KL3.ini",
-      "DatronKL2":"//Nuernberg.eto.int/nuserver/Home/m.svoboda/02_Aufgaben/869_mse_auf_kl2/I_CAT.INI"}
+      "DatronKL2":"I_CAT_KL2.ini"}
 
 '''
 Read I_Cat.ini for the configured global positions
@@ -90,49 +92,6 @@ D_Position_04_5=0
 D_Kennung_04=2
 '''   
 
-
-#Datron animator
-progs={"MKSV4K":"N:/Datron 5/Sicherung_2018-05-24/Disp/MKSV4_K.MCR",
-       "EL40_alt":"U:/02_Aufgaben/918_Datron_3_EL40_Anpassung/EL40_V_alt.MCR",
-       "EL40_neu":"U:/02_Aufgaben/918_Datron_3_EL40_Anpassung/EL40_V_neu.MCR",
-       "EB7_neu6":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/EB7_V_neu6.MCR",
-       "EB7_neu4":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/EB7_V_neu4.MCR",
-       "EB7_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/EB7_V_alt.MCR",
-       "LF20_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LF20_36_V_alt.MCR",
-       "LF20_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LF20_36_V_neu.MCR",
-       "V20_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400V20_36_V_alt.MCR",
-       "V20_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400V20_36_V_neu.MCR",
-       "MDS_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MDS-M_V_alt.MCR",
-       "MDS_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MDS-M_V_neu.MCR",
-       "VSE_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400VSE_V_alt.MCR",
-       "VSE_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400VSE_V_neu.MCR",
-       "VSE_neu_2":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400VSE_V_neu_2.MCR",
-       "LC2_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LC2_V_alt.MCR",
-       "LC2_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/S400LC2_V_neu.MCR",
-       "El3_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/El3_V_alt.MCR",
-       "El3_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/El3_V_neu.MCR",
-       "mksv_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MKSV4_V_alt.MCR",
-       "mksv_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MKSV4_V_neu.MCR",
-       "CBU_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/CBU-M_V_alt.MCR",
-       "CBU_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/CBU-M_V_neu.MCR",
-       "CBU":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/CBU-M_V.MCR",
-       "CBU2":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/CBU-M_V_2.MCR",
-       "DPS6":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/DPS6_K.MCR",
-       "MSE_alt":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MSE_V.MCR",
-       "MSE_neu":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MSE_V_neu.MCR",
-       "MSE_neu2":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/MSE_V_neu_2.MCR",
-       "test":"U:/02_Aufgaben/960_Datron_Verguss_Beschleunigung/test.txt",
-       "dps_alt":"U:/02_Aufgaben/919_Datron_5_DPS6_K/DPS6_K_alt.MCR",
-       "dps":"U:/02_Aufgaben/919_Datron_5_DPS6_K/DPS6_K_neu.MCR",
-       "tss_Michal":"L:/Wisniewski/DATRON/TSS_michal.MCR",
-       "tss_Michal2":"U:/02_Aufgaben/888_Adrian_Datron_Programme/TSS_michal.MCR",
-       "MSE_KL2":"U:/02_Aufgaben/869_mse_auf_kl2/MSE_V.mcr",
-       "dps6_v":"//Nuernberg.eto.int/nuserver/Home/m.svoboda/02_Aufgaben/879_DPS_6_Tropfen/DPS6_V.MCR",
-       "VDS90":"//Nuernberg.eto.int/nuserver/Home/m.svoboda/02_Aufgaben/868_VDS_90_Datron/VDS_90.MCR",
-       "VDS90_KL3":"//Nuernberg.eto.int/nuserver/Home/m.svoboda/02_Aufgaben/868_VDS_90_Datron/VDS_90_KL3.MCR",
-       "druckanschluss":"U:/02_Aufgaben/865_Datron_S400V_Druckanschluss/S400V_druckanschluss_k.MCR"
-       }
-
 import numpy as np
 
 def cart2pol(x, y):
@@ -183,13 +142,14 @@ def is_number(s):
         return(False)
 
 class Datprog:
-    def __init__(self,fname,datron):
+    def __init__(self,mcrfilecontent,datron):
         try:
             config.read(icat[datron],encoding='ansi')
         except UnicodeDecodeError as er:
             print("icat_parse_error "+str(er))
             pass
-        self.name=fname
+        self.name="test"
+        self.mcrfilecontent=mcrfilecontent
         self.read_file()
         self.get_markierungen()
         self.get_submakros()
@@ -207,12 +167,9 @@ class Datprog:
         return(progs[self.name])
 
     def read_file(self):
-        self.prog=[]
-
-        with open(self.get_path(),"r") as f:
-            for line in f:
-                self.prog.append(line)
-        
+        self.prog = []
+        for line in self.mcrfilecontent.split("\n"):
+            self.prog.append(line)
 
     def get_markierungen(self):
         markierungen={}
@@ -260,7 +217,7 @@ class Datprog:
 
             for key in sorted(self.variables,reverse=True):
                 rhs=rhs.replace(key,str(self.variables[key]))
-
+            
             try:
                 rhs=eval(rhs)
 
@@ -614,9 +571,8 @@ def run_prog(prog,yaxis="y",xaxis="x",datron="DatronKL3"):
     print("länge: "+str(length))
     return(dat)
 
-a=run_prog("VDS90_KL3","z","x","DatronKL3")
-#a=run_prog("druckanschluss","y","x","DatronKL1")
-#a=run_prog("El3_neu","y","x","DatronKL3")
-print(len(a.position["x"]))
+
+#a=run_prog("example","y","x","DatronKL3")
+#print(len(a.position["x"]))
 
      
