@@ -11,7 +11,7 @@ config=configparser.ConfigParser(comment_prefixes=('#'),allow_no_value=True,stri
 
 icat={"DatronKL1":"I_CAT_KL1.ini",
       "DatronKL4_V":"I_CAT_KL4_V.ini",
-      "DatronKL4_K":"I_CAT_KL_4_KL.ini"
+      "DatronKL4_K":"I_CAT_KL_4_KL.ini",
       "DatronKL3":"I_CAT_KL3.ini",
       "DatronKL2":"I_CAT_KL2.ini"}
 
