@@ -7,13 +7,10 @@ import random
 import configparser
 import numpy as np
 
-config=configparser.ConfigParser(comment_prefixes=('#'),allow_no_value=True,strict=False)
+config=configparser.ConfigParser(comment_prefixes='#', allow_no_value=True, strict=False)
 
-icat={"DatronKL1":"I_CAT_KL1.ini",
-      "DatronKL4_V":"I_CAT_KL4_V.ini",
-      "DatronKL4_K":"I_CAT_KL_4_KL.ini",
-      "DatronKL3":"I_CAT_KL3.ini",
-      "DatronKL2":"I_CAT_KL2.ini"}
+icat = {'DatronKL1': 'I_CAT_KL1.ini', 'DatronKL4_V': 'I_CAT_KL4_V.ini', 'DatronKL4_K': 'I_CAT_KL_4_KL.ini',
+        'DatronKL3': 'I_CAT_KL3.ini', 'DatronKL2': 'I_CAT_KL2.ini'}
 
 '''
 Read I_Cat.ini for the configured global positions
@@ -144,12 +141,13 @@ def is_number(s):
 class Datprog:
     def __init__(self,mcrfilecontent,datron):
         try:
-            config.read(icat[datron],encoding='ansi')
+            config.read(icat[datron],encoding= "cp858")#encoding='ansi' funguje na win?
         except UnicodeDecodeError as er:
             print("icat_parse_error "+str(er))
             pass
         self.name="test"
         self.mcrfilecontent=mcrfilecontent
+        self.prog = []
         self.read_file()
         self.get_markierungen()
         self.get_submakros()
@@ -167,7 +165,7 @@ class Datprog:
         return(progs[self.name])
 
     def read_file(self):
-        self.prog = []
+
         for line in self.mcrfilecontent.split("\n"):
             self.prog.append(line)
 
@@ -571,6 +569,35 @@ def run_prog(prog,yaxis="y",xaxis="x",datron="DatronKL3"):
     print("länge: "+str(length))
     return(dat)
 
+def plot_path(dat, yaxis="y", xaxis="x"):
+
+    plt.plot(dat.position[xaxis], dat.position[yaxis], "b-")
+
+    k = 0
+    for i, ii in enumerate(dat.position["makro"]):
+        if dat.position["makro"][i] != "kreis":
+            plt.annotate(k, xy=(dat.position[xaxis][i], dat.position[yaxis][i]), fontsize=8)
+            k = k + 1
+
+    plt.ylabel(yaxis)
+    plt.xlabel(xaxis)
+    plt.title(dat.name)
+    plt.grid(b=True, which='major', color='r', linestyle='--')
+    plt.grid(b=True, which='minor', color='g', linestyle='--')
+    plt.minorticks_on()
+
+    plt.show()
+
+    x_0 = 0
+    y_0 = 0
+    length = 0
+
+    for x, y in zip(dat.position[xaxis], dat.position[yaxis]):
+        length += math.sqrt((x - x_0) * (x - x_0) + (y - y_0) * (y - y_0))
+        x_0 = x
+        y_0 = y
+
+    print("länge: " + str(length))
 
 #a=run_prog("example","y","x","DatronKL3")
 #print(len(a.position["x"]))
