@@ -470,6 +470,11 @@ class Datprog:
             self.actual_position["x"].append(x-float(config["CsMCoord"]["MCoordTabPos_0"+coordsys+"_0"])/100000)
             self.actual_position["y"].append(y-float(config["CsMCoord"]["MCoordTabPos_0"+coordsys+"_1"])/100000)
             self.actual_position["z"].append(z-float(config["CsMCoord"]["MCoordTabPos_0"+coordsys+"_2"])/100000)
+        
+    def print_coords(self):
+        df=pd.DataFrame(dat.position)
+        df = df[df['makro'] != "kreis"].reset_index()
+        print(df)
 
 
 def anim(datronObjekt):
@@ -509,12 +514,6 @@ def run_prog(prog,yaxis="y",xaxis="x",datron="DatronKL3"):
     dat=Datprog(prog,datron)
     dat.go_through()
     dat.calculate_global()
-    
-    print(len(dat.position["x"]))
-
-    df=pd.DataFrame(dat.position)
-    df = df[df['makro'] != "kreis"].reset_index()
-    print(df)
 
     dat.calculate_coord("2")#lasersensor?
     plt.scatter(dat.actual_position[xaxis],dat.actual_position[yaxis],s=2,zorder=1,c='C1')
