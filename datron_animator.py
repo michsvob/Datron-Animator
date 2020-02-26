@@ -481,11 +481,11 @@ class Datprog:
         k = 0
         for i, ii in enumerate(self.position["makro"]):
             if self.position["makro"][i] != "kreis":
-                plt.annotate(k, xy=(dat.position[xaxis][i], self.position[yaxis][i]), fontsize=8)
+                plt.annotate(k, xy=(self.position[xaxis][i], self.position[yaxis][i]), fontsize=8)
                 k = k + 1
         plt.ylabel(yaxis)
         plt.xlabel(xaxis)
-        plt.title(dat.name)
+        plt.title(self.name)
         plt.grid(b=True, which='major', color='r', linestyle='--')
         plt.grid(b=True, which='minor', color='g', linestyle='--')
         plt.minorticks_on()
