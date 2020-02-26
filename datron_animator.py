@@ -472,9 +472,35 @@ class Datprog:
             self.actual_position["z"].append(z-float(config["CsMCoord"]["MCoordTabPos_0"+coordsys+"_2"])/100000)
         
     def print_coords(self):
-        df=pd.DataFrame(dat.position)
+        df=pd.DataFrame(self.position)
         df = df[df['makro'] != "kreis"].reset_index()
         print(df)
+        
+    def plot_path(self, yaxis="y", xaxis="x"):
+        plt.plot(self.position[xaxis], self.position[yaxis], "b-")
+        k = 0
+        for i, ii in enumerate(self.position["makro"]):
+            if self.position["makro"][i] != "kreis":
+                plt.annotate(k, xy=(dat.position[xaxis][i], self.position[yaxis][i]), fontsize=8)
+                k = k + 1
+        plt.ylabel(yaxis)
+        plt.xlabel(xaxis)
+        plt.title(dat.name)
+        plt.grid(b=True, which='major', color='r', linestyle='--')
+        plt.grid(b=True, which='minor', color='g', linestyle='--')
+        plt.minorticks_on()
+        plt.show()
+
+        x_0 = 0
+        y_0 = 0
+       length = 0
+
+        for x, y in zip(self.position[xaxis], self.position[yaxis]):
+            length += math.sqrt((x - x_0) * (x - x_0) + (y - y_0) * (y - y_0))
+            x_0 = x
+            y_0 = y
+
+        print("länge: " + str(length))
 
 
 def anim(datronObjekt):
@@ -570,38 +596,3 @@ def run_prog(prog,yaxis="y",xaxis="x",datron="DatronKL3"):
 
     print("länge: "+str(length))
     return(dat)
-
-def plot_path(dat, yaxis="y", xaxis="x"):
-
-    plt.plot(dat.position[xaxis], dat.position[yaxis], "b-")
-
-    k = 0
-    for i, ii in enumerate(dat.position["makro"]):
-        if dat.position["makro"][i] != "kreis":
-            plt.annotate(k, xy=(dat.position[xaxis][i], dat.position[yaxis][i]), fontsize=8)
-            k = k + 1
-
-    plt.ylabel(yaxis)
-    plt.xlabel(xaxis)
-    plt.title(dat.name)
-    plt.grid(b=True, which='major', color='r', linestyle='--')
-    plt.grid(b=True, which='minor', color='g', linestyle='--')
-    plt.minorticks_on()
-
-    plt.show()
-
-    x_0 = 0
-    y_0 = 0
-    length = 0
-
-    for x, y in zip(dat.position[xaxis], dat.position[yaxis]):
-        length += math.sqrt((x - x_0) * (x - x_0) + (y - y_0) * (y - y_0))
-        x_0 = x
-        y_0 = y
-
-    print("länge: " + str(length))
-
-#a=run_prog("example","y","x","DatronKL3")
-#print(len(a.position["x"]))
-
-     
