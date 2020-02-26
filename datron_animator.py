@@ -493,7 +493,7 @@ class Datprog:
 
         x_0 = 0
         y_0 = 0
-       length = 0
+        length = 0
 
         for x, y in zip(self.position[xaxis], self.position[yaxis]):
             length += math.sqrt((x - x_0) * (x - x_0) + (y - y_0) * (y - y_0))
