@@ -7,6 +7,9 @@ import random
 import configparser
 import numpy as np
 
+pd.set_option('expand_frame_repr', False)
+pd.set_option('display.max_rows', 500)
+
 config=configparser.ConfigParser(comment_prefixes='#', allow_no_value=True, strict=False)
 
 icat = {'DatronKL1': 'I_CAT_KL1.ini', 'DatronKL4_V': 'I_CAT_KL4_V.ini', 'DatronKL4_K': 'I_CAT_KL_4_KL.ini',
