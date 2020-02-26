@@ -142,7 +142,7 @@ def is_number(s):
         return(False)
 
 class Datprog:
-    def __init__(self,mcrfilecontent,datron):
+    def __init__(self,mcrfilecontent,datron='DatronKL2'):
         try:
             config.read(icat[datron],encoding= "cp858")#encoding='ansi' funguje na win?
         except UnicodeDecodeError as er:
