@@ -1,6 +1,3 @@
-!Makro Datei ; Erzeugt am 05.06.18 - 12:31 V8.04P!
-!CBU-M rechter Kopf mit UV-Verguss!
-
 _libmakros auf_ab -1, Pumpsel -1, ponoff_2kopf -1, spuelen -1, dispon -1, dispoff -1, oadmGetValue -1;
 
 _sprache 0;
@@ -18,23 +15,6 @@ Variable Wt, Vs, Zf, Zs, Z0, Zd, A, B, Menge, Pd, Teilnichtda, Abstand, Kartusch
      Untere_grenze, Durchlauf, Wt_hoehe0, V_druckbehaelter, Wt0, Var_spuelen,      V_spuelen,n_teile_vorne,n_teile_mitte,n_teile_hinten,
      Y_start_hinten,Y_start_vorne,Y_start_mitte,X_start;
      
-
-Smakros Teileerkennung, Kartuschenwechsel_rechts, Nochmalspuelen_rechts,  
-     Abdeckraupe, Mseerkennung, Rueckzug_rechter_kopf, Abstandsanzeige, Pause_rechts, 
-     Spuelen_rechts,Bauteil_hinten,Bauteil_mitte,Bauteil_vorne;
-
-_maske _haupt, 0, 0, "Haupt";
-
-_maske Kartuschenwechsel_rechts, 0, 0, "Kartuschenwechsel_rechts";
-
-_maske Nochmalspuelen_rechts, 2, 0, "Submakro Beschreibung"
-_feld Nochmalspuelen, 1, 0, 0, 0, 1, 2, "nochmal spuelen", "Soll nochmal gespuelt werden?";
-
-_maske Abdeckraupe, 0, 0, "Dispensen einer Abdeckraupe";
-
-_maske Mseerkennung, 0, 0, "MSE_Erkennung";
-
-_maske Pause_rechts, 0, 0, "Pauseposition anfahren";
 
 (
   Amax = 30;!Maximale Anzahl an Teilen pro Träger!
@@ -169,7 +149,7 @@ _maske Pause_rechts, 0, 0, "Pauseposition anfahren";
   Markierung 50;!wenn Teil gefunden hier hin springen!
   Position 12, 0;
   Text 3 = "";
-  Text 3 = "MSE wurde erkannt-->falsches Programm geladen!";
+  Text 3 = "M wurde erkannt-->falsches Programm geladen!";
   Schreibe 3, 0;
   Melde 3, 0, 0, 0;
   ; !Text 1 = "";!
@@ -280,7 +260,7 @@ Mladen 1, 0;
 Markierung 5;
 
 ; !Vordruck 1 bar!
-V_mseerkennung = 0;!Variable damit MSEerkennung nur zu Programmbeginn abgefragt wird!
+V_mseerkennung = 0;!Variable damit M erkennung nur zu Programmbeginn abgefragt wird!
 Zeitbispause = 200;
 V_spuelen = 0;!Variable Spuelen!
 Pumpsel 1;!Dosierkopf rechts!
