@@ -122,6 +122,9 @@ def zero(number):
     else:
         return 1
 
+def Zero(number):
+    return zero(number)
+
 def floor (number):
     return math.floor(number)
 
