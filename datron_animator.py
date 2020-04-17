@@ -109,12 +109,21 @@ def heav(number):
         return 1
     else:
         return 0
-       
+
+def Heav(number):
+    return Heav(number)
+
 def cos(number):
     return math.cos(2*3.14*number/360)
 
+def Cos(number):
+    return cos(number)
+
 def sin(number):
     return math.sin(2*3.14*number/360)
+
+def Sin(number):
+    return sin(number)
 
 def zero(number):
     if number==0:
